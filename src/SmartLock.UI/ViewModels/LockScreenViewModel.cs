@@ -8,7 +8,6 @@ namespace SmartLock.UI.ViewModels;
 public sealed class LockScreenViewModel : INotifyPropertyChanged
 {
     private readonly ISecurityEventService _securityEvents;
-    private string _credentialInput = string.Empty;
     private string _statusMessage = "Ready";
 
     public LockScreenViewModel(ISecurityEventService securityEvents)
@@ -18,12 +17,6 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    public string CredentialInput
-    {
-        get => _credentialInput;
-        set => SetField(ref _credentialInput, value);
-    }
 
     public string StatusMessage
     {
@@ -40,7 +33,6 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
             "Authentication is not configured in this development build.");
 
         StatusMessage = "Authentication is not configured in this development build.";
-        CredentialInput = string.Empty;
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
