@@ -1,11 +1,17 @@
 using System.Windows;
+using SmartLock.Core.Services;
 
 namespace SmartLock.App;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    private readonly ISecurityEventService _securityEvents;
+
+    public MainWindow(ISecurityEventService securityEvents)
     {
+        ArgumentNullException.ThrowIfNull(securityEvents);
+        _securityEvents = securityEvents;
+
         InitializeComponent();
         Loaded += (_, _) => PinBox.Focus();
         PreviewKeyDown += (_, e) =>
@@ -20,8 +26,11 @@ public partial class MainWindow : Window
 
     private void Unlock_Click(object sender, RoutedEventArgs e)
     {
-        // V0.1 intentionally does not authenticate or handle Windows credentials.
-        // Authentication integration will use supported Windows APIs in a later milestone.
+        _securityEvents.Record(
+            "AUTH_ATTEMPT",
+            "REJECTED",
+            "Authentication is not configured in this development build.");
+
         StatusText.Text = "Authentication is not configured in this development build.";
         PinBox.Clear();
         PinBox.Focus();
