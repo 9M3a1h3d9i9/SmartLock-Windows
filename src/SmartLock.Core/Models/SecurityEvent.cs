@@ -2,7 +2,8 @@ namespace SmartLock.Core.Models;
 
 public sealed record SecurityEvent(
     DateTimeOffset Timestamp,
-    string EventType,
-    string Status,
+    SecurityEventType EventType,
+    SecuritySeverity Severity,
+    SecurityEventStatus Status,
     string Message,
     string IncidentId);
