@@ -1,6 +1,14 @@
+using SmartLock.Core.Models;
+
 namespace SmartLock.Core.Services;
 
 public interface ISecurityEventService
 {
-    void Record(string eventType, string status, string message);
+    SecurityEvent Record(
+        SecurityEventType eventType,
+        SecuritySeverity severity,
+        SecurityEventStatus status,
+        string message);
+
+    IReadOnlyList<SecurityEvent> Events { get; }
 }
