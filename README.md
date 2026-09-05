@@ -9,20 +9,19 @@
 
 SmartLock-Windows is a portfolio-grade Windows desktop application project focused on building a polished, privacy-conscious lock-screen experience without bypassing or replacing Windows authentication mechanisms.
 
-## Current Milestone — V0.2
+## Current Milestone — V0.3
 
-V0.2 begins the professional UI layer:
+V0.3 establishes the security domain engine:
 
-- C# / .NET 10 / WPF application shell
-- Dedicated `SmartLock.UI` presentation project
-- Reusable WPF theme resources and design tokens
-- Professional dark lock-screen layout with surface hierarchy and status indicator
-- Explicit `DEVELOPMENT MODE` labeling
-- `LockScreenViewModel` for testable presentation behavior
-- Dedicated UI unit tests
-- Security-event behavior remains isolated behind the Core service contract
+- Strongly typed security-event categories
+- Explicit severity levels and lifecycle states
+- Thread-safe in-memory security-event store
+- Incident model and deterministic policy evaluation
+- Rejected-authentication and policy-violation detection rules
+- Core/UI tests migrated to the typed security model
+- Security boundaries documented for future Windows integration
 
-### Run locally
+## Run locally
 
 Prerequisite: Windows with the .NET 10 SDK installed.
 
@@ -67,8 +66,8 @@ SmartLock aims to combine:
 SmartLock-Windows/
 ├── src/
 │   ├── SmartLock.App/              # WPF application/composition root
-│   ├── SmartLock.Core/             # Domain models and contracts
-│   ├── SmartLock.Security/         # Future security policies/adapters
+│   ├── SmartLock.Core/             # Domain models, events, incidents and policies
+│   ├── SmartLock.Security/         # Future security adapters
 │   ├── SmartLock.UI/               # WPF theme + view models
 │   └── SmartLock.Infrastructure/   # Future OS/storage/network adapters
 ├── tests/
@@ -76,7 +75,8 @@ SmartLock-Windows/
 │   └── SmartLock.UI.Tests/         # UI/view-model unit tests
 ├── docs/
 │   ├── ARCHITECTURE.md
-│   └── V0.2.md
+│   ├── V0.2.md
+│   └── V0.3.md
 ├── assets/
 ├── installer/
 └── .github/workflows/ci.yml
@@ -86,7 +86,7 @@ SmartLock-Windows/
 
 - [x] V0.1 — Native application foundation
 - [x] V0.2 — Professional lock-screen UX and authentication UI foundation
-- [ ] V0.3 — Security event engine
+- [x] V0.3 — Security event engine
 - [ ] V0.4 — Intelligent session/context awareness
 - [ ] V0.5 — Windows integration
 - [ ] V0.6 — Accessibility and localization
