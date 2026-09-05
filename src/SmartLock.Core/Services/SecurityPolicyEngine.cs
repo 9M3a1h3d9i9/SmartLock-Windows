@@ -4,7 +4,7 @@ namespace SmartLock.Core.Services;
 
 public sealed class SecurityPolicyEngine
 {
-    public Incident? Evaluate(SecurityEvent securityEvent)
+    public static Incident? Evaluate(SecurityEvent securityEvent)
     {
         ArgumentNullException.ThrowIfNull(securityEvent);
 
