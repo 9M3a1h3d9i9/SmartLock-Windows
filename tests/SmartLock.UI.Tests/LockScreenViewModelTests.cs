@@ -1,3 +1,4 @@
+using SmartLock.Core.Models;
 using SmartLock.Core.Services;
 using SmartLock.UI.ViewModels;
 
@@ -19,8 +20,9 @@ public sealed class LockScreenViewModelTests
         Assert.Empty(viewModel.CredentialInput);
         Assert.Equal("Authentication is not configured in this development build.", viewModel.StatusMessage);
         var securityEvent = Assert.Single(events.Events);
-        Assert.Equal("AUTH_ATTEMPT", securityEvent.EventType);
-        Assert.Equal("REJECTED", securityEvent.Status);
+        Assert.Equal(SecurityEventType.AuthenticationAttempt, securityEvent.EventType);
+        Assert.Equal(SecuritySeverity.Warning, securityEvent.Severity);
+        Assert.Equal(SecurityEventStatus.Rejected, securityEvent.Status);
     }
 
     [Fact]
