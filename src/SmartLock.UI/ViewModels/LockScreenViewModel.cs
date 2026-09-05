@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using SmartLock.Core.Models;
 using SmartLock.Core.Services;
 
 namespace SmartLock.UI.ViewModels;
@@ -33,8 +34,9 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
     public void SubmitAuthentication()
     {
         _securityEvents.Record(
-            "AUTH_ATTEMPT",
-            "REJECTED",
+            SecurityEventType.AuthenticationAttempt,
+            SecuritySeverity.Warning,
+            SecurityEventStatus.Rejected,
             "Authentication is not configured in this development build.");
 
         StatusMessage = "Authentication is not configured in this development build.";
