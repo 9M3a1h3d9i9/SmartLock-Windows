@@ -1,22 +1,44 @@
+using SmartLock.Core.Models;
+
 namespace SmartLock.Core.Services;
 
 public sealed class SecurityEventService : ISecurityEventService
 {
-    private readonly List<Models.SecurityEvent> _events = [];
+    private readonly List<SecurityEvent> _events = [];
+    private readonly object _sync = new();
 
-    public IReadOnlyList<Models.SecurityEvent> Events => _events.AsReadOnly();
-
-    public void Record(string eventType, string status, string message)
+    public IReadOnlyList<SecurityEvent> Events
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(eventType);
-        ArgumentException.ThrowIfNullOrWhiteSpace(status);
+        get
+        {
+            lock (_sync)
+            {
+                return _events.ToArray();
+            }
+        }
+    }
+
+    public SecurityEvent Record(
+        SecurityEventType eventType,
+        SecuritySeverity severity,
+        SecurityEventStatus status,
+        string message)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
-        _events.Add(new Models.SecurityEvent(
+        var securityEvent = new SecurityEvent(
             DateTimeOffset.UtcNow,
-            eventType.Trim(),
-            status.Trim(),
+            eventType,
+            severity,
+            status,
             message.Trim(),
-            $"SL-{Guid.NewGuid():N}"));
+            $"SL-{Guid.NewGuid():N}");
+
+        lock (_sync)
+        {
+            _events.Add(securityEvent);
+        }
+
+        return securityEvent;
     }
 }
