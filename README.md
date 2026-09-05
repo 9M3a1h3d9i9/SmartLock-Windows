@@ -9,17 +9,17 @@
 
 SmartLock-Windows is a portfolio-grade Windows desktop application project focused on building a polished, privacy-conscious lock-screen experience without bypassing or replacing Windows authentication mechanisms.
 
-## Current Milestone — V0.3
+## Current Milestone — V0.4
 
-V0.3 establishes the security domain engine:
+V0.4 adds the smart context foundation:
 
-- Strongly typed security-event categories
-- Explicit severity levels and lifecycle states
+- Strongly typed security-event categories, severity, and lifecycle
 - Thread-safe in-memory security-event store
-- Incident model and deterministic policy evaluation
-- Rejected-authentication and policy-violation detection rules
-- Core/UI tests migrated to the typed security model
-- Security boundaries documented for future Windows integration
+- Incident model and deterministic security policy evaluation
+- Session state model: Active, Idle, Locked, Restricted
+- Immutable session context and deterministic context evaluator
+- Unit tests for session-state transitions and invalid inputs
+- Credential input is kept out of the UI ViewModel/application state
 
 ## Run locally
 
@@ -76,7 +76,8 @@ SmartLock-Windows/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── V0.2.md
-│   └── V0.3.md
+│   ├── V0.3.md
+│   └── V0.4.md
 ├── assets/
 ├── installer/
 └── .github/workflows/ci.yml
@@ -87,7 +88,7 @@ SmartLock-Windows/
 - [x] V0.1 — Native application foundation
 - [x] V0.2 — Professional lock-screen UX and authentication UI foundation
 - [x] V0.3 — Security event engine
-- [ ] V0.4 — Intelligent session/context awareness
+- [x] V0.4 — Intelligent session/context awareness
 - [ ] V0.5 — Windows integration
 - [ ] V0.6 — Accessibility and localization
 - [ ] V0.7 — Security hardening and performance
