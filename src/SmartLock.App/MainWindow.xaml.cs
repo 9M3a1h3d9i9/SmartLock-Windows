@@ -20,7 +20,6 @@ public partial class MainWindow : Window
 
     private void Unlock_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.CredentialInput = PinBox.Password;
         _viewModel.SubmitAuthentication();
         PinBox.Clear();
         PinBox.Focus();
