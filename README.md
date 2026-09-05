@@ -9,16 +9,18 @@
 
 SmartLock-Windows is a portfolio-grade Windows desktop application project focused on building a polished, privacy-conscious lock-screen experience without bypassing or replacing Windows authentication mechanisms.
 
-## Current Milestone — V0.1
+## Current Milestone — V0.2
 
-V0.1 establishes the native application foundation:
+V0.2 begins the professional UI layer:
 
 - C# / .NET 10 / WPF application shell
-- UI-independent `SmartLock.Core` domain layer
-- Explicit security-event contract and in-memory implementation
-- Unit tests for core event behavior
-- Windows-based GitHub Actions CI for restore, build, and test
-- Architecture and security-boundary documentation
+- Dedicated `SmartLock.UI` presentation project
+- Reusable WPF theme resources and design tokens
+- Professional dark lock-screen layout with surface hierarchy and status indicator
+- Explicit `DEVELOPMENT MODE` labeling
+- `LockScreenViewModel` for testable presentation behavior
+- Dedicated UI unit tests
+- Security-event behavior remains isolated behind the Core service contract
 
 ### Run locally
 
@@ -67,23 +69,23 @@ SmartLock-Windows/
 │   ├── SmartLock.App/              # WPF application/composition root
 │   ├── SmartLock.Core/             # Domain models and contracts
 │   ├── SmartLock.Security/         # Future security policies/adapters
-│   ├── SmartLock.UI/               # Future reusable UI/view-model layer
+│   ├── SmartLock.UI/               # WPF theme + view models
 │   └── SmartLock.Infrastructure/   # Future OS/storage/network adapters
 ├── tests/
-│   └── SmartLock.Core.Tests/       # Core unit tests
+│   ├── SmartLock.Core.Tests/       # Core unit tests
+│   └── SmartLock.UI.Tests/         # UI/view-model unit tests
 ├── docs/
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   └── V0.2.md
 ├── assets/
 ├── installer/
 └── .github/workflows/ci.yml
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the V0.1 boundaries and acceptance criteria.
-
 ## Roadmap
 
 - [x] V0.1 — Native application foundation
-- [ ] V0.2 — Professional lock-screen UX and authentication UI
+- [x] V0.2 — Professional lock-screen UX and authentication UI foundation
 - [ ] V0.3 — Security event engine
 - [ ] V0.4 — Intelligent session/context awareness
 - [ ] V0.5 — Windows integration
