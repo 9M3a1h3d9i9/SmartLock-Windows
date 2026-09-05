@@ -7,17 +7,13 @@ namespace SmartLock.UI.Tests;
 public sealed class LockScreenViewModelTests
 {
     [Fact]
-    public void SubmitAuthentication_RecordsRejectedAttemptAndClearsInput()
+    public void SubmitAuthentication_RecordsRejectedAttemptAndUpdatesStatus()
     {
         var events = new SecurityEventService();
-        var viewModel = new LockScreenViewModel(events)
-        {
-            CredentialInput = "development-value"
-        };
+        var viewModel = new LockScreenViewModel(events);
 
         viewModel.SubmitAuthentication();
 
-        Assert.Empty(viewModel.CredentialInput);
         Assert.Equal("Authentication is not configured in this development build.", viewModel.StatusMessage);
         var securityEvent = Assert.Single(events.Events);
         Assert.Equal(SecurityEventType.AuthenticationAttempt, securityEvent.EventType);
@@ -26,14 +22,14 @@ public sealed class LockScreenViewModelTests
     }
 
     [Fact]
-    public void CredentialInput_RaisesPropertyChanged()
+    public void StatusMessage_RaisesPropertyChanged()
     {
         var viewModel = new LockScreenViewModel(new SecurityEventService());
         string? changedProperty = null;
         viewModel.PropertyChanged += (_, args) => changedProperty = args.PropertyName;
 
-        viewModel.CredentialInput = "value";
+        viewModel.SubmitAuthentication();
 
-        Assert.Equal(nameof(LockScreenViewModel.CredentialInput), changedProperty);
+        Assert.Equal(nameof(LockScreenViewModel.StatusMessage), changedProperty);
     }
 }
