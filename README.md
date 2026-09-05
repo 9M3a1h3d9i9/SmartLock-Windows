@@ -9,17 +9,17 @@
 
 SmartLock-Windows is a portfolio-grade Windows desktop application project focused on building a polished, privacy-conscious lock-screen experience without bypassing or replacing Windows authentication mechanisms.
 
-## Current Milestone — V0.4
+## Current Milestone — V0.5
 
-V0.4 adds the smart context foundation:
+V0.5 introduces the first controlled Windows integration layer:
 
-- Strongly typed security-event categories, severity, and lifecycle
-- Thread-safe in-memory security-event store
-- Incident model and deterministic security policy evaluation
-- Session state model: Active, Idle, Locked, Restricted
-- Immutable session context and deterministic context evaluator
-- Unit tests for session-state transitions and invalid inputs
-- Credential input is kept out of the UI ViewModel/application state
+- Dedicated `SmartLock.Infrastructure` project for OS-specific adapters
+- `ISessionSignalProvider` abstraction in Core
+- Real Windows idle-time signal through `GetLastInputInfo`
+- One-second session-context monitoring in the desktop app
+- Live Active/Idle session state and idle-duration display
+- Failure isolation around OS signal polling
+- Credential input remains outside application state
 
 ## Run locally
 
@@ -37,7 +37,7 @@ To run the development application:
 dotnet run --project src/SmartLock.App/SmartLock.App.csproj
 ```
 
-The current development shell intentionally does **not** authenticate against Windows. `Ctrl+E` closes the development window. Real Windows integration is reserved for later milestones and will use documented operating-system APIs.
+The development shell intentionally does **not** authenticate against Windows and does not replace the Windows lock screen. `Ctrl+E` closes the development window. V0.5 reads only the user-idle signal through a Windows API.
 
 ## Vision
 
@@ -69,7 +69,7 @@ SmartLock-Windows/
 │   ├── SmartLock.Core/             # Domain models, events, incidents and policies
 │   ├── SmartLock.Security/         # Future security adapters
 │   ├── SmartLock.UI/               # WPF theme + view models
-│   └── SmartLock.Infrastructure/   # Future OS/storage/network adapters
+│   └── SmartLock.Infrastructure/   # Windows/OS-specific adapters
 ├── tests/
 │   ├── SmartLock.Core.Tests/       # Core unit tests
 │   └── SmartLock.UI.Tests/         # UI/view-model unit tests
@@ -77,7 +77,8 @@ SmartLock-Windows/
 │   ├── ARCHITECTURE.md
 │   ├── V0.2.md
 │   ├── V0.3.md
-│   └── V0.4.md
+│   ├── V0.4.md
+│   └── V0.5.md
 ├── assets/
 ├── installer/
 └── .github/workflows/ci.yml
@@ -89,7 +90,7 @@ SmartLock-Windows/
 - [x] V0.2 — Professional lock-screen UX and authentication UI foundation
 - [x] V0.3 — Security event engine
 - [x] V0.4 — Intelligent session/context awareness
-- [ ] V0.5 — Windows integration
+- [x] V0.5 — Controlled Windows integration
 - [ ] V0.6 — Accessibility and localization
 - [ ] V0.7 — Security hardening and performance
 - [ ] V0.8 — Installer and packaging
