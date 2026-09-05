@@ -1,4 +1,5 @@
 using System.Windows;
+using SmartLock.Core.Models;
 using SmartLock.Core.Services;
 using SmartLock.UI.ViewModels;
 
@@ -16,6 +17,12 @@ public partial class MainWindow : Window
         InitializeComponent();
         Loaded += (_, _) => PinBox.Focus();
         DataContext = _viewModel;
+    }
+
+    public void UpdateSessionContext(SessionContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        StatusText.Text = $"Session: {context.State} • Idle: {context.IdleDuration:hh\\:mm\\:ss}";
     }
 
     private void Unlock_Click(object sender, RoutedEventArgs e)
