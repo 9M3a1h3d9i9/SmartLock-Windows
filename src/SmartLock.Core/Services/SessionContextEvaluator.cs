@@ -4,12 +4,9 @@ namespace SmartLock.Core.Services;
 
 public sealed class SessionContextEvaluator
 {
-    public SessionContext Evaluate(DateTimeOffset observedAt, TimeSpan idleDuration, bool isLocked)
+    public static SessionContext Evaluate(DateTimeOffset observedAt, TimeSpan idleDuration, bool isLocked)
     {
-        if (idleDuration < TimeSpan.Zero)
-        {
-            throw new ArgumentOutOfRangeException(nameof(idleDuration));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(idleDuration, TimeSpan.Zero);
 
         var state = isLocked
             ? SessionState.Locked
