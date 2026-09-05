@@ -11,5 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartLock.Core\SmartLock.Core.csproj" />
     <ProjectReference Include="..\SmartLock.UI\SmartLock.UI.csproj" />
+    <ProjectReference Include="..\SmartLock.Infrastructure\SmartLock.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
