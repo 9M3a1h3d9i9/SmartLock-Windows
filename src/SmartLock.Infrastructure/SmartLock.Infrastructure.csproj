@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartLock.Core\SmartLock.Core.csproj" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.0" />
   </ItemGroup>
 </Project>
