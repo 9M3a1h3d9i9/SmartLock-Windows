@@ -13,7 +13,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        var window = new MainWindow(SecurityEvents);
+        var cameraEvidence = new WindowsCameraEvidenceService();
+        var window = new MainWindow(SecurityEvents, cameraEvidence);
         MainWindow = window;
         window.Show();
 
