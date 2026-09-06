@@ -7,6 +7,16 @@ public sealed class SecurityEventService : ISecurityEventService
     private readonly List<SecurityEvent> _events = [];
     private readonly object _sync = new();
 
+    public SecurityEventService(IEnumerable<SecurityEvent>? initialEvents = null)
+    {
+        if (initialEvents is null)
+        {
+            return;
+        }
+
+        _events.AddRange(initialEvents);
+    }
+
     public IReadOnlyList<SecurityEvent> Events
     {
         get
