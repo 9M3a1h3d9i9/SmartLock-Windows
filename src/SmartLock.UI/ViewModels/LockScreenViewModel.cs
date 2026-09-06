@@ -56,16 +56,26 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
     public bool IsProcessing
     {
         get => _isProcessing;
-        private set => SetField(ref _isProcessing, value);
+        private set
+        {
+            if (!SetField(ref _isProcessing, value))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(CanSubmit));
+        }
     }
 
     public bool IsLockedOut => _incidentEngine.State.IsLocked;
+
+    public bool CanSubmit => !IsProcessing && !IsLockedOut;
 
     public int RemainingAttempts => _incidentEngine.State.RemainingAttempts;
 
     public async Task SubmitAuthenticationAsync()
     {
-        if (IsProcessing || IsLockedOut)
+        if (!CanSubmit)
         {
             RefreshSecurityState();
             return;
@@ -131,17 +141,19 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(IsLockedOut));
         OnPropertyChanged(nameof(RemainingAttempts));
+        OnPropertyChanged(nameof(CanSubmit));
     }
 
-    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
         {
-            return;
+            return false;
         }
 
         field = value;
         OnPropertyChanged(propertyName);
+        return true;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
