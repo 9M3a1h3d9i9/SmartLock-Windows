@@ -7,12 +7,16 @@ namespace SmartLock.App;
 
 public partial class App : Application
 {
-    public ISecurityEventService SecurityEvents { get; } = new SecurityEventService();
+    public ISecurityEventService SecurityEvents { get; private set; } = null!;
     public AuthenticationIncidentEngine IncidentEngine { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        var eventStore = new JsonSecurityEventStore();
+        var eventLogSink = new WindowsEventLogSecuritySink();
+        SecurityEvents = new PersistentSecurityEventService(eventStore, eventLogSink);
 
         IncidentEngine = new AuthenticationIncidentEngine(
             SecurityEvents,
