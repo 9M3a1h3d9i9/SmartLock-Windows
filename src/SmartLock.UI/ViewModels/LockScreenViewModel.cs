@@ -8,12 +8,20 @@ namespace SmartLock.UI.ViewModels;
 public sealed class LockScreenViewModel : INotifyPropertyChanged
 {
     private readonly ISecurityEventService _securityEvents;
+    private readonly ICameraEvidenceService _cameraEvidence;
     private string _statusMessage = "Ready";
+    private bool _cameraEvidenceEnabled;
+    private bool _isProcessing;
 
-    public LockScreenViewModel(ISecurityEventService securityEvents)
+    public LockScreenViewModel(
+        ISecurityEventService securityEvents,
+        ICameraEvidenceService cameraEvidence)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
+        ArgumentNullException.ThrowIfNull(cameraEvidence);
+
         _securityEvents = securityEvents;
+        _cameraEvidence = cameraEvidence;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -24,15 +32,70 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
         private set => SetField(ref _statusMessage, value);
     }
 
-    public void SubmitAuthentication()
+    public bool CameraEvidenceEnabled
     {
-        _securityEvents.Record(
-            SecurityEventType.AuthenticationAttempt,
-            SecuritySeverity.Warning,
-            SecurityEventStatus.Rejected,
-            "Authentication is not configured in this development build.");
+        get => _cameraEvidenceEnabled;
+        set => SetField(ref _cameraEvidenceEnabled, value);
+    }
 
-        StatusMessage = "Authentication is not configured in this development build.";
+    public bool IsProcessing
+    {
+        get => _isProcessing;
+        private set => SetField(ref _isProcessing, value);
+    }
+
+    public async Task SubmitAuthenticationAsync()
+    {
+        if (IsProcessing)
+        {
+            return;
+        }
+
+        IsProcessing = true;
+        try
+        {
+            var securityEvent = _securityEvents.Record(
+                SecurityEventType.AuthenticationAttempt,
+                SecuritySeverity.Warning,
+                SecurityEventStatus.Rejected,
+                "Authentication attempt rejected in development mode.");
+
+            StatusMessage = "Authentication failed.";
+
+            if (!CameraEvidenceEnabled)
+            {
+                StatusMessage += " Camera evidence is disabled.";
+                return;
+            }
+
+            StatusMessage = "Authentication failed. Capturing security evidence...";
+            var capture = await _cameraEvidence.CaptureFailedAuthenticationAsync(securityEvent.IncidentId);
+
+            if (capture.Success)
+            {
+                _securityEvents.Record(
+                    SecurityEventType.PolicyViolation,
+                    SecuritySeverity.High,
+                    SecurityEventStatus.Observed,
+                    $"Camera evidence captured for failed authentication: {capture.FilePath}");
+
+                StatusMessage = $"Authentication failed. Security photo captured locally.\n{capture.FilePath}";
+            }
+            else
+            {
+                _securityEvents.Record(
+                    SecurityEventType.PolicyViolation,
+                    SecuritySeverity.Warning,
+                    SecurityEventStatus.Observed,
+                    $"Camera evidence capture failed: {capture.ErrorMessage}");
+
+                StatusMessage = $"Authentication failed. Camera capture failed.\n{capture.ErrorMessage}";
+            }
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
