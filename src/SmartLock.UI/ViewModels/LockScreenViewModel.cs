@@ -11,15 +11,18 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
     private readonly ISecurityEventService _securityEvents;
     private readonly ICameraEvidenceService _cameraEvidence;
     private readonly AuthenticationIncidentEngine _incidentEngine;
+    private readonly IWorkstationLockService? _workstationLock;
     private string _statusMessage = "Ready";
     private bool _cameraEvidenceEnabled;
+    private bool _lockWindowsSessionOnPolicyLockout;
     private bool _isProcessing;
     private string _lockoutMessage = string.Empty;
 
     public LockScreenViewModel(
         ISecurityEventService securityEvents,
         ICameraEvidenceService cameraEvidence,
-        AuthenticationIncidentEngine incidentEngine)
+        AuthenticationIncidentEngine incidentEngine,
+        IWorkstationLockService? workstationLock = null)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
         ArgumentNullException.ThrowIfNull(cameraEvidence);
@@ -28,6 +31,7 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
         _securityEvents = securityEvents;
         _cameraEvidence = cameraEvidence;
         _incidentEngine = incidentEngine;
+        _workstationLock = workstationLock;
         RefreshSecurityState();
     }
 
@@ -51,6 +55,12 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
     {
         get => _cameraEvidenceEnabled;
         set => SetField(ref _cameraEvidenceEnabled, value);
+    }
+
+    public bool LockWindowsSessionOnPolicyLockout
+    {
+        get => _lockWindowsSessionOnPolicyLockout;
+        set => SetField(ref _lockWindowsSessionOnPolicyLockout, value);
     }
 
     public bool IsProcessing
@@ -92,6 +102,18 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
             if (result.LockedOut)
             {
                 StatusMessage = "Security lockout activated. Try again after the lockout expires.";
+
+                if (LockWindowsSessionOnPolicyLockout && _workstationLock is not null)
+                {
+                    var locked = _workstationLock.TryLock();
+                    _securityEvents.Record(
+                        SecurityEventType.PolicyViolation,
+                        locked ? SecuritySeverity.High : SecuritySeverity.Warning,
+                        SecurityEventStatus.Observed,
+                        locked
+                            ? "Windows workstation locked after application policy lockout."
+                            : "Windows workstation lock request failed after application policy lockout.");
+                }
             }
 
             if (CameraEvidenceEnabled)
