@@ -24,7 +24,8 @@ public partial class App : Application
             lockoutDuration: TimeSpan.FromSeconds(30));
 
         var cameraEvidence = new WindowsCameraEvidenceService();
-        var window = new MainWindow(SecurityEvents, cameraEvidence, IncidentEngine);
+        var workstationLock = new WindowsWorkstationLockService();
+        var window = new MainWindow(SecurityEvents, cameraEvidence, IncidentEngine, workstationLock);
         MainWindow = window;
         window.Show();
 
