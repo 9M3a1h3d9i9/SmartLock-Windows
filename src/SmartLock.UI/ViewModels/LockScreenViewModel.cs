@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SmartLock.Core.Models;
@@ -9,27 +10,41 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
 {
     private readonly ISecurityEventService _securityEvents;
     private readonly ICameraEvidenceService _cameraEvidence;
+    private readonly AuthenticationIncidentEngine _incidentEngine;
     private string _statusMessage = "Ready";
     private bool _cameraEvidenceEnabled;
     private bool _isProcessing;
+    private string _lockoutMessage = string.Empty;
 
     public LockScreenViewModel(
         ISecurityEventService securityEvents,
-        ICameraEvidenceService cameraEvidence)
+        ICameraEvidenceService cameraEvidence,
+        AuthenticationIncidentEngine incidentEngine)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
         ArgumentNullException.ThrowIfNull(cameraEvidence);
+        ArgumentNullException.ThrowIfNull(incidentEngine);
 
         _securityEvents = securityEvents;
         _cameraEvidence = cameraEvidence;
+        _incidentEngine = incidentEngine;
+        RefreshSecurityState();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public ObservableCollection<SecurityEvent> IncidentTimeline { get; } = [];
 
     public string StatusMessage
     {
         get => _statusMessage;
         private set => SetField(ref _statusMessage, value);
+    }
+
+    public string LockoutMessage
+    {
+        get => _lockoutMessage;
+        private set => SetField(ref _lockoutMessage, value);
     }
 
     public bool CameraEvidenceEnabled
@@ -44,58 +59,78 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
         private set => SetField(ref _isProcessing, value);
     }
 
+    public bool IsLockedOut => _incidentEngine.State.IsLocked;
+
+    public int RemainingAttempts => _incidentEngine.State.RemainingAttempts;
+
     public async Task SubmitAuthenticationAsync()
     {
-        if (IsProcessing)
+        if (IsProcessing || IsLockedOut)
         {
+            RefreshSecurityState();
             return;
         }
 
         IsProcessing = true;
         try
         {
-            var securityEvent = _securityEvents.Record(
-                SecurityEventType.AuthenticationAttempt,
-                SecuritySeverity.Warning,
-                SecurityEventStatus.Rejected,
-                "Authentication attempt rejected in development mode.");
+            // Development authentication deliberately rejects the attempt.
+            // Windows credentials are never read, stored, or intercepted.
+            var result = _incidentEngine.RegisterFailedAttempt("Authentication attempt rejected in development mode.");
+            StatusMessage = $"Authentication failed. {result.State.FailedAttempts}/{result.State.MaxFailedAttempts} failed attempts.";
 
-            StatusMessage = "Authentication failed.";
-
-            if (!CameraEvidenceEnabled)
+            if (result.LockedOut)
             {
-                StatusMessage += " Camera evidence is disabled.";
-                return;
+                StatusMessage = "Security lockout activated. Try again after the lockout expires.";
             }
 
-            StatusMessage = "Authentication failed. Capturing security evidence...";
-            var capture = await _cameraEvidence.CaptureFailedAuthenticationAsync(securityEvent.IncidentId);
-
-            if (capture.Success)
+            if (CameraEvidenceEnabled)
             {
-                _securityEvents.Record(
-                    SecurityEventType.PolicyViolation,
-                    SecuritySeverity.High,
-                    SecurityEventStatus.Observed,
-                    $"Camera evidence captured for failed authentication: {capture.FilePath}");
+                StatusMessage = "Authentication failed. Capturing security evidence...";
+                var capture = await _cameraEvidence.CaptureFailedAuthenticationAsync(result.Event.IncidentId);
 
-                StatusMessage = $"Authentication failed. Security photo captured locally.\n{capture.FilePath}";
-            }
-            else
-            {
-                _securityEvents.Record(
-                    SecurityEventType.PolicyViolation,
-                    SecuritySeverity.Warning,
-                    SecurityEventStatus.Observed,
-                    $"Camera evidence capture failed: {capture.ErrorMessage}");
-
-                StatusMessage = $"Authentication failed. Camera capture failed.\n{capture.ErrorMessage}";
+                if (capture.Success)
+                {
+                    _securityEvents.Record(
+                        SecurityEventType.PolicyViolation,
+                        SecuritySeverity.High,
+                        SecurityEventStatus.Observed,
+                        $"Camera evidence captured for failed authentication: {capture.FilePath}");
+                    StatusMessage = "Authentication failed. Security photo captured locally.";
+                }
+                else
+                {
+                    _securityEvents.Record(
+                        SecurityEventType.PolicyViolation,
+                        SecuritySeverity.Warning,
+                        SecurityEventStatus.Observed,
+                        $"Camera evidence capture failed: {capture.ErrorMessage}");
+                    StatusMessage = $"Authentication failed. Camera capture failed: {capture.ErrorMessage}";
+                }
             }
         }
         finally
         {
             IsProcessing = false;
+            RefreshSecurityState();
         }
+    }
+
+    public void RefreshSecurityState()
+    {
+        var state = _incidentEngine.State;
+        LockoutMessage = state.IsLocked
+            ? $"LOCKED OUT • {state.RemainingLockout!.Value.TotalSeconds:0} seconds remaining"
+            : $"Security policy • {state.RemainingAttempts} attempt(s) remaining";
+
+        IncidentTimeline.Clear();
+        foreach (var securityEvent in _securityEvents.Events.OrderByDescending(e => e.Timestamp).Take(20))
+        {
+            IncidentTimeline.Add(securityEvent);
+        }
+
+        OnPropertyChanged(nameof(IsLockedOut));
+        OnPropertyChanged(nameof(RemainingAttempts));
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -106,6 +141,9 @@ public sealed class LockScreenViewModel : INotifyPropertyChanged
         }
 
         field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        OnPropertyChanged(propertyName);
     }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
