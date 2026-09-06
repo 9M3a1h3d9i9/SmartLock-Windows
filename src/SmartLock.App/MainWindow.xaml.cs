@@ -9,11 +9,14 @@ public partial class MainWindow : Window
 {
     private readonly LockScreenViewModel _viewModel;
 
-    public MainWindow(ISecurityEventService securityEvents)
+    public MainWindow(
+        ISecurityEventService securityEvents,
+        ICameraEvidenceService cameraEvidence)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
+        ArgumentNullException.ThrowIfNull(cameraEvidence);
 
-        _viewModel = new LockScreenViewModel(securityEvents);
+        _viewModel = new LockScreenViewModel(securityEvents, cameraEvidence);
         InitializeComponent();
         Loaded += (_, _) => PinBox.Focus();
         DataContext = _viewModel;
@@ -25,9 +28,9 @@ public partial class MainWindow : Window
         StatusText.Text = $"Session: {context.State} • Idle: {context.IdleDuration:hh\\:mm\\:ss}";
     }
 
-    private void Unlock_Click(object sender, RoutedEventArgs e)
+    private async void Unlock_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.SubmitAuthentication();
+        await _viewModel.SubmitAuthenticationAsync();
         PinBox.Clear();
         PinBox.Focus();
     }
