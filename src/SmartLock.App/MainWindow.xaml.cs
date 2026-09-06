@@ -12,13 +12,14 @@ public partial class MainWindow : Window
     public MainWindow(
         ISecurityEventService securityEvents,
         ICameraEvidenceService cameraEvidence,
-        AuthenticationIncidentEngine incidentEngine)
+        AuthenticationIncidentEngine incidentEngine,
+        IWorkstationLockService? workstationLock = null)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
         ArgumentNullException.ThrowIfNull(cameraEvidence);
         ArgumentNullException.ThrowIfNull(incidentEngine);
 
-        _viewModel = new LockScreenViewModel(securityEvents, cameraEvidence, incidentEngine);
+        _viewModel = new LockScreenViewModel(securityEvents, cameraEvidence, incidentEngine, workstationLock);
         InitializeComponent();
         Loaded += (_, _) => PinBox.Focus();
         DataContext = _viewModel;
