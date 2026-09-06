@@ -16,7 +16,7 @@
 
         <DockPanel Grid.Row="0">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="SMARTLOCK" FontSize="14" FontWeight="Bold" LetterSpacing="2" />
+                <TextBlock Text="SMARTLOCK" FontSize="14" FontWeight="Bold" />
                 <TextBlock Text="Secure session" Foreground="{StaticResource SecondaryTextBrush}" FontSize="13" Margin="0,4,0,0" />
             </StackPanel>
             <Border DockPanel.Dock="Right" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="12,7">
@@ -45,6 +45,16 @@
                     <TextBlock Text="Enter your development credential" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,22" />
                     <PasswordBox x:Name="PinBox" Style="{StaticResource CredentialBoxStyle}" />
                     <Button Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="46" Margin="0,14,0,0" Click="Unlock_Click" />
+
+                    <CheckBox Content="Capture a camera photo after a failed attempt"
+                              IsChecked="{Binding CameraEvidenceEnabled, Mode=TwoWay}"
+                              Margin="0,16,0,0"
+                              FontSize="13" />
+                    <TextBlock Text="Opt-in only. Photos are captured from the default webcam and stored locally under the SmartLock application-data folder. Windows camera privacy settings still apply."
+                               TextWrapping="Wrap"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               FontSize="11"
+                               Margin="24,6,0,0" />
                     <TextBlock x:Name="StatusText" Text="Ready" TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,16,0,0" />
                 </StackPanel>
             </Border>
