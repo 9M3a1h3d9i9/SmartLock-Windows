@@ -8,13 +8,19 @@ namespace SmartLock.App;
 public partial class App : Application
 {
     public ISecurityEventService SecurityEvents { get; } = new SecurityEventService();
+    public AuthenticationIncidentEngine IncidentEngine { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
+        IncidentEngine = new AuthenticationIncidentEngine(
+            SecurityEvents,
+            maxFailedAttempts: 5,
+            lockoutDuration: TimeSpan.FromSeconds(30));
+
         var cameraEvidence = new WindowsCameraEvidenceService();
-        var window = new MainWindow(SecurityEvents, cameraEvidence);
+        var window = new MainWindow(SecurityEvents, cameraEvidence, IncidentEngine);
         MainWindow = window;
         window.Show();
 
