@@ -67,7 +67,7 @@
                     <TextBlock Text="Development authentication • no Windows password access"
                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,22" />
                     <PasswordBox x:Name="PinBox" Style="{StaticResource CredentialBoxStyle}" />
-                    <Button Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="46" Margin="0,14,0,0" Click="Unlock_Click" IsEnabled="{Binding IsProcessing, Converter={StaticResource InverseBooleanConverter}}" />
+                    <Button Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="46" Margin="0,14,0,0" Click="Unlock_Click" IsEnabled="{Binding CanSubmit}" />
 
                     <CheckBox Content="Capture a camera photo after a failed attempt"
                               IsChecked="{Binding CameraEvidenceEnabled, Mode=TwoWay}"
