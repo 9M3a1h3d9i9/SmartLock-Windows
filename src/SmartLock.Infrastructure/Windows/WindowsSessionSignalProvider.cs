@@ -9,12 +9,17 @@ public sealed class WindowsSessionSignalProvider : ISessionSignalProvider
     public SessionContext GetCurrentContext(DateTimeOffset observedAt)
     {
         var idleDuration = GetIdleDuration();
-        return new SessionContextEvaluator().Evaluate(observedAt, idleDuration, isLocked: false);
+        return SessionContextEvaluator.Evaluate(observedAt, idleDuration, isLocked: false);
     }
 
     private static TimeSpan GetIdleDuration()
     {
-        if (!GetLastInputInfo(out var lastInputInfo))
+        var lastInputInfo = new LASTINPUTINFO
+        {
+            cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>()
+        };
+
+        if (!GetLastInputInfo(ref lastInputInfo))
         {
             throw new InvalidOperationException("Windows could not provide the last user-input timestamp.");
         }
@@ -25,16 +30,6 @@ public sealed class WindowsSessionSignalProvider : ISessionSignalProvider
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
-
-    private static bool GetLastInputInfo(out LASTINPUTINFO info)
-    {
-        info = new LASTINPUTINFO
-        {
-            cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>()
-        };
-
-        return GetLastInputInfo(ref info);
-    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct LASTINPUTINFO
