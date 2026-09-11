@@ -16,19 +16,13 @@ public sealed class TotpAdminOtpService : IAdminOtpService
     public bool Validate(string code)
     {
         if (_secret.Length == 0 || string.IsNullOrWhiteSpace(code) || code.Length != 6 || !code.All(char.IsDigit))
-        {
             return false;
-        }
 
         var currentStep = DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 30;
         for (var offset = -1; offset <= 1; offset++)
         {
-            if (CryptographicOperations.FixedTimeEquals(
-                    ComputeCode(currentStep + offset),
-                    System.Text.Encoding.ASCII.GetBytes(code)))
-            {
+            if (CryptographicOperations.FixedTimeEquals(ComputeCode(currentStep + offset), System.Text.Encoding.ASCII.GetBytes(code)))
                 return true;
-            }
         }
 
         return false;
@@ -38,7 +32,9 @@ public sealed class TotpAdminOtpService : IAdminOtpService
     {
         Span<byte> data = stackalloc byte[8];
         System.Buffers.Binary.BinaryPrimitives.WriteInt64BigEndian(data, counter);
+#pragma warning disable CA5350 // HMAC-SHA1 is required by the standard TOTP profile implemented here.
         using var hmac = new HMACSHA1(_secret);
+#pragma warning restore CA5350
         var hash = hmac.ComputeHash(data.ToArray());
         var offset = hash[^1] & 0x0F;
         var binary = ((hash[offset] & 0x7F) << 24)
@@ -52,10 +48,7 @@ public sealed class TotpAdminOtpService : IAdminOtpService
     private static byte[] DecodeBase32(string value)
     {
         var normalized = value.Trim().Replace(" ", string.Empty).TrimEnd('=').ToUpperInvariant();
-        if (normalized.Length == 0)
-        {
-            return [];
-        }
+        if (normalized.Length == 0) return [];
 
         var output = new List<byte>();
         var buffer = 0;
@@ -68,12 +61,7 @@ public sealed class TotpAdminOtpService : IAdminOtpService
                 >= '2' and <= '7' => character - '2' + 26,
                 _ => -1
             };
-
-            if (digit < 0)
-            {
-                return [];
-            }
-
+            if (digit < 0) return [];
             buffer = (buffer << 5) | digit;
             bits += 5;
             if (bits >= 8)
@@ -82,7 +70,6 @@ public sealed class TotpAdminOtpService : IAdminOtpService
                 output.Add((byte)((buffer >> bits) & 0xFF));
             }
         }
-
         return output.ToArray();
     }
 }
