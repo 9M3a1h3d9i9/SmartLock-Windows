@@ -18,19 +18,25 @@ public partial class App : Application
         var eventLogSink = new WindowsEventLogSecuritySink();
         SecurityEvents = new PersistentSecurityEventService(eventStore, eventLogSink);
 
-        IncidentEngine = new AuthenticationIncidentEngine(
-            SecurityEvents,
-            maxFailedAttempts: 5,
-            lockoutDuration: TimeSpan.FromSeconds(30));
+        IncidentEngine = new AuthenticationIncidentEngine(SecurityEvents, maxFailedAttempts: 5, lockoutDuration: TimeSpan.FromSeconds(30));
 
         var cameraEvidence = new WindowsCameraEvidenceService();
         var workstationLock = new WindowsWorkstationLockService();
-        var window = new MainWindow(SecurityEvents, cameraEvidence, IncidentEngine, workstationLock);
+        var telegram = new TelegramAlertService();
+        var adminOtp = new TotpAdminOtpService();
+        var windowsAlert = new WindowsSecurityAlertService();
+        var incomingCall = new WindowsIncomingCallService();
+
+        var window = new MainWindow(SecurityEvents, cameraEvidence, IncidentEngine, workstationLock, telegram, adminOtp, windowsAlert, incomingCall);
         MainWindow = window;
         window.Show();
 
         var monitor = new SessionContextMonitor(new WindowsSessionSignalProvider(), TimeSpan.FromSeconds(1));
-        window.Closed += (_, _) => monitor.Dispose();
+        window.Closed += (_, _) =>
+        {
+            monitor.Dispose();
+            telegram.Dispose();
+        };
         monitor.ContextUpdated += (_, context) => window.UpdateSessionContext(context);
         monitor.Start();
     }

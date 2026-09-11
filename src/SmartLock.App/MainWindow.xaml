@@ -27,7 +27,7 @@
             </Border>
         </DockPanel>
 
-        <Grid Grid.Row="1" MaxWidth="1120" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid Grid.Row="1" MaxWidth="1180" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1.05*" />
                 <ColumnDefinition Width="0.95*" />
@@ -35,9 +35,8 @@
 
             <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,56,0">
                 <TextBlock Text="Protected session" FontSize="42" FontWeight="SemiBold" />
-                <TextBlock Text="SmartLock records authentication incidents and enforces an application-level lockout policy."
+                <TextBlock Text="SmartLock records authentication incidents and enforces an application-level security policy."
                            TextWrapping="Wrap" MaxWidth="540" FontSize="17" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,12,0,0" />
-
                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="18" Padding="20" Margin="0,28,0,0">
                     <StackPanel>
                         <TextBlock Text="SECURITY POLICY" FontSize="11" FontWeight="Bold" />
@@ -47,9 +46,8 @@
                         <TextBlock Text="{Binding LockoutMessage}" FontSize="13" FontWeight="SemiBold" Margin="0,12,0,0" />
                     </StackPanel>
                 </Border>
-
                 <TextBlock Text="INCIDENT TIMELINE" FontSize="11" FontWeight="Bold" Margin="0,24,0,8" />
-                <ListBox ItemsSource="{Binding IncidentTimeline}" MaxHeight="190" Background="Transparent" BorderThickness="0">
+                <ListBox ItemsSource="{Binding IncidentTimeline}" MaxHeight="220" Background="Transparent" BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0,3">
@@ -62,33 +60,47 @@
             </StackPanel>
 
             <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="24" Padding="32">
-                <StackPanel>
-                    <TextBlock Text="Sign in" FontSize="24" FontWeight="SemiBold" />
-                    <TextBlock Text="Development authentication • no Windows password access"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,22" />
-                    <PasswordBox x:Name="PinBox" Style="{StaticResource CredentialBoxStyle}" />
-                    <Button Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="46" Margin="0,14,0,0" Click="Unlock_Click" IsEnabled="{Binding CanSubmit}" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Sign in" FontSize="24" FontWeight="SemiBold" />
+                        <TextBlock Text="Development authentication • no Windows password access"
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,22" />
+                        <PasswordBox x:Name="PinBox" Style="{StaticResource CredentialBoxStyle}" />
+                        <Button Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="46" Margin="0,14,0,0" Click="Unlock_Click" IsEnabled="{Binding CanSubmit}" />
 
-                    <CheckBox Content="Capture a camera photo after a failed attempt"
-                              IsChecked="{Binding CameraEvidenceEnabled, Mode=TwoWay}"
-                              Margin="0,16,0,0"
-                              FontSize="13" />
-                    <TextBlock Text="Opt-in only. Evidence is captured from the default webcam and stored locally. Camera privacy settings still apply."
-                               TextWrapping="Wrap"
-                               Foreground="{StaticResource SecondaryTextBrush}"
-                               FontSize="11"
-                               Margin="24,6,0,0" />
-                    <CheckBox Content="Lock Windows session after policy lockout"
-                              IsChecked="{Binding LockWindowsSessionOnPolicyLockout, Mode=TwoWay}"
-                              Margin="0,16,0,0"
-                              FontSize="13" />
-                    <TextBlock Text="Optional. Uses the official Windows workstation lock API; it does not read or manage your Windows password."
-                               TextWrapping="Wrap"
-                               Foreground="{StaticResource SecondaryTextBrush}"
-                               FontSize="11"
-                               Margin="24,6,0,0" />
-                    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,16,0,0" />
-                </StackPanel>
+                        <TextBlock Text="SECURITY EVIDENCE &amp; ALERTS" FontSize="11" FontWeight="Bold" Margin="0,24,0,8" />
+                        <CheckBox Content="Capture a camera photo after a failed attempt"
+                                  IsChecked="{Binding CameraEvidenceEnabled, Mode=TwoWay}" FontSize="13" />
+                        <TextBlock Text="Opt-in only. Photo remains local unless Telegram alerting is also enabled."
+                                   TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="24,6,0,0" />
+
+                        <CheckBox Content="Send incident alerts through Telegram"
+                                  IsChecked="{Binding TelegramAlertsEnabled, Mode=TwoWay}" Margin="0,14,0,0" FontSize="13" />
+                        <TextBlock Text="Uses TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables. Never sends Windows passwords."
+                                   TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="24,6,0,0" />
+
+                        <CheckBox Content="Show Windows security alert on lockout"
+                                  IsChecked="{Binding WindowsSecurityAlertsEnabled, Mode=TwoWay}" Margin="0,14,0,0" FontSize="13" />
+                        <CheckBox Content="Show incoming security call notification on lockout"
+                                  IsChecked="{Binding IncomingCallEnabled, Mode=TwoWay}" Margin="0,10,0,0" FontSize="13" />
+
+                        <CheckBox Content="Lock Windows session after policy lockout"
+                                  IsChecked="{Binding LockWindowsSessionOnPolicyLockout, Mode=TwoWay}" Margin="0,10,0,0" FontSize="13" />
+                        <TextBlock Text="Optional. Uses the official Windows workstation lock API; it does not read or manage your Windows password."
+                                   TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="24,6,0,0" />
+
+                        <TextBlock Text="ADMIN OTP" FontSize="11" FontWeight="Bold" Margin="0,22,0,8" />
+                        <DockPanel>
+                            <PasswordBox x:Name="AdminOtpBox" Width="150" HorizontalAlignment="Left" PasswordChanged="AdminOtpBox_PasswordChanged" />
+                            <Button Content="Authorize" Margin="10,0,0,0" Click="AdminOtp_Click" Padding="14,6" />
+                        </DockPanel>
+                        <TextBlock Text="TOTP secret comes from ADMIN_OTP_SECRET. OTP can clear the application lockout; it never unlocks Windows itself."
+                                   TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="0,6,0,0" />
+
+                        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,16,0,0" />
+                        <TextBlock x:Name="StatusText" Text="Session: Active • Idle: 00:00:00" TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0" />
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
 

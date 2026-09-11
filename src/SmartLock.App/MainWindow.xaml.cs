@@ -13,13 +13,17 @@ public partial class MainWindow : Window
         ISecurityEventService securityEvents,
         ICameraEvidenceService cameraEvidence,
         AuthenticationIncidentEngine incidentEngine,
-        IWorkstationLockService? workstationLock = null)
+        IWorkstationLockService? workstationLock = null,
+        ITelegramAlertService? telegram = null,
+        IAdminOtpService? adminOtp = null,
+        IWindowsSecurityAlertService? windowsAlert = null,
+        IIncomingCallService? incomingCall = null)
     {
         ArgumentNullException.ThrowIfNull(securityEvents);
         ArgumentNullException.ThrowIfNull(cameraEvidence);
         ArgumentNullException.ThrowIfNull(incidentEngine);
 
-        _viewModel = new LockScreenViewModel(securityEvents, cameraEvidence, incidentEngine, workstationLock);
+        _viewModel = new LockScreenViewModel(securityEvents, cameraEvidence, incidentEngine, workstationLock, telegram, adminOtp, windowsAlert, incomingCall);
         InitializeComponent();
         Loaded += (_, _) => PinBox.Focus();
         DataContext = _viewModel;
@@ -36,6 +40,18 @@ public partial class MainWindow : Window
         await _viewModel.SubmitAuthenticationAsync();
         PinBox.Clear();
         PinBox.Focus();
+    }
+
+    private void AdminOtpBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        _viewModel.AdminOtpCode = AdminOtpBox.Password;
+    }
+
+    private void AdminOtp_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.TryAdminOverride();
+        AdminOtpBox.Clear();
+        AdminOtpBox.Focus();
     }
 
     protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
